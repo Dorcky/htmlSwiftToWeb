@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SwiftUI Converter</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    .gradient-custom {
+      background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+    }
+    .copy-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .code-container {
+      position: relative;
+    }
+    .custom-shadow {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container my-5">
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold text-primary">SwiftUI Converter</h1>
+      <p class="lead text-muted">Convertissez facilement votre code SwiftUI en React Native ou HTML</p>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card custom-shadow border-0 rounded-3 p-4 bg-white">
+          <form id="conversionForm">
+            <div class="mb-4">
+              <label for="swiftuiCode" class="form-label fw-bold">Code SwiftUI</label>
+              <textarea 
+                id="swiftuiCode" 
+                class="form-control form-control-lg" 
+                rows="8" 
+                placeholder="Collez votre code SwiftUI ici..." 
+                required
+              ></textarea>
+            </div>
+
+            <div class="mb-4">
+              <label for="target" class="form-label fw-bold">Format de conversion</label>
+              <select id="target" class="form-select form-select-lg" required>
+                <option value="react-native">React Native</option>
+                <option value="html-css-bootstrap">HTML / CSS / Bootstrap</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 gradient-custom">
+              <i class="fas fa-sync-alt me-2"></i>Convertir
+            </button>
+          </form>
+        </div>
+
+        <div class="card custom-shadow border-0 rounded-3 mt-4 p-4 bg-white d-none" id="resultCard">
+          <h3 class="mb-4 text-primary">Code Converti</h3>
+          <div class="code-container">
+            <button class="btn btn-outline-primary copy-button" onclick="copyCode()">
+              <i class="fas fa-copy me-2"></i>Copier
+            </button>
+            <pre id="convertedCode" class="bg-light p-4 rounded-3" style="max-height: 400px; overflow-y: auto;"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('conversionForm');
+    const resultCard = document.getElementById('resultCard');
+    const convertedCodeContainer = document.getElementById('convertedCode');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const swiftuiCode = document.getElementById('swiftuiCode').value;
+      const target = document.getElementById('target').value;
+
+      try {
+        const response = await axios.post('https://swiftuitoreact.onrender.com/convert', {
+          code: swiftuiCode,
+          target: target
+        });
+
+        convertedCodeContainer.textContent = response.data.convertedCode;
+        resultCard.classList.remove('d-none');
+      } catch (error) {
+        alert('Erreur lors de la conversion : ' + error.response?.data || error.message);
+      }
+    });
+
+    function copyCode() {
+      const codeText = convertedCodeContainer.textContent;
+      navigator.clipboard.writeText(codeText).then(() => {
+        const copyButton = document.querySelector('.copy-button');
+        copyButton.innerHTML = '<i class="fas fa-check me-2"></i>Copié !';
+        setTimeout(() => {
+          copyButton.innerHTML = '<i class="fas fa-copy me-2"></i>Copier';
+        }, 2000);
+      }).catch(err => {
+        alert('Erreur lors de la copie : ' + err);
+      });
+    }
+  </script>
+</body>
+</html>
